@@ -1,0 +1,160 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <title>Stock Quotes </title>
+  <link rel="stylesheet" href="sg/slick.grid.css" type="text/css"/>
+  <link rel="stylesheet" href="sg/css/smoothness/jquery-ui-1.8.16.custom.css" type="text/css"/>
+<link rel="stylesheet" href="sg/examples/examples.css" type="text/css"/>
+<script src="sg/lib/jquery-1.7.min.js"></script>
+<script src="sg/lib/jquery.event.drag-2.2.js"></script>
+<script src="sg/slick.core.js"></script>
+<script src="sg/slick.grid.js"></script>
+<script src="sg/slick.formatters.js"></script>
+<style>
+.number{text-align:right}
+</style>
+</head>
+<body>
+<input type='text' id='symbol'  placeholder='Enter a Symbol'>
+<button onclick="enterSymbol()">Add Symbol</button><br><br>
+<div id="myGrid" style="height:200px; overflow:scroll"></div>
+
+
+<script>
+  var grid;
+  
+  var data = [];
+
+  var options = {
+    enableCellNavigation: true,
+    enableColumnReorder: false,
+    multiColumnSort: true
+  };
+
+
+ init();
+
+
+ function showEmptyWatchList(){
+	$(".grid-canvas").eq(0).css("text-align","center").html("There's no symbol in your watchlist, please add one").css("font-size","20px").css("padding-top","20px")
+ }
+
+ function DeleteData(symbol, row){
+	if (data[row]["symbol"]== symbol){
+   		$.ajax({url: "getQuote.php",
+			type: "post",
+			data: "action=delete&symbol="+symbol,
+			success: function(retV){
+	 		var ret=JSON.parse(retV)
+	 		data=ret;
+         		gridUpdate(data)
+	 		if (ret.length<1){
+				showEmptyWatchList()
+	 		}
+    		}});  
+	}
+ }
+
+ function init(){
+   $.ajax({url: "getQuote.php",
+	type: "post",
+	success: function(retV){
+	 var ret=JSON.parse(retV)
+	 data=ret;
+         gridUpdate(data)
+	 if (ret.length<1){
+		showEmptyWatchList()
+	 }
+    }});  
+  }
+   
+
+ function enterSymbol(){
+   inp = $("#symbol").val()
+   if (inp == ""){return}
+   for (i=0;i<data.length;i++){
+	if (data[i]['symbol']==inp.toUpperCase()){
+		alert("The symbol '"+inp+"' has already been added to the watchlist")
+		return
+	}
+   }
+   $.ajax({url: "getQuote.php",
+	type: "post",
+	data: "action=add&symbol="+inp,
+	success: function(retV){
+	 var ret=JSON.parse(retV)
+	 if (ret.length<1){
+		alert("The given Symbol '"+inp +"' does not exist")
+		return
+	 }
+	 data=ret;
+         gridUpdate(data)
+    }});  
+  }
+
+
+
+/* functions */
+  function gridUpdate(data){
+    var columns = [
+      {id: "symbol", name: "Symbol", field: "symbol", sortable:true},
+      {id: "name", name: "Symble Name", field: "name", sortable:true},
+      {id: "last", name: "Last Price", field: "last", sortable:true, cssClass:"number"},
+      {id: "change", name: "Change", field: "change", sortable:true, cssClass:"number"},
+      {id: "pctchange", name: "%change", field: "pctchange", sortable:true, cssClass:"number"},
+      {id: "volume", name: "Volume", field: "volume", sortable:true, cssClass:"number"},
+      {id: "tradetime", name: "Time", field: "tradetime", sortable:true, cssClass:"time"},
+      {id: "delete", name: "&nbsp;", width: 25, cssClass: "delete", formatter: Slick.Formatters.Delete}
+    ];
+
+    grid = new Slick.Grid("#myGrid", data, columns, options);
+    
+    grid.onSort.subscribe(function (e, args) {
+      var cols = args.sortCols;
+      data.sort(function (dataRow1, dataRow2) {
+        for (var i = 0, l = cols.length; i < l; i++) {
+          var field = cols[i].sortCol.field;
+          var sign = cols[i].sortAsc ? 1 : -1;
+          var value1 = dataRow1[field], value2 = dataRow2[field];
+          var result = (value1 == value2 ? 0 : (value1 > value2 ? 1 : -1)) * sign;
+          if (result != 0) {
+            return result;
+          }
+        }
+        return 0;
+      });
+      grid.invalidate();
+      grid.render();
+    });
+  } 
+
+/* register 'enter' text box as 'add symbol' */
+document.getElementById("symbol").addEventListener("keydown", function(e) {
+    if (!e) { var e = window.event; }
+    // Enter is pressed
+    if (e.keyCode == 13) { enterSymbol(); }
+}, false);
+
+</script>
+<div>
+<h3> Read Me </h3>
+<br>
+<U>Framework used </U><br>
+1. SlickGrid <br>
+2. JQuery<br><br>
+
+<U>Possible improvement</U><br>
+A. Visual<br>
+ 1. Use lightbox to replace alert box <br>
+ 2. Warning on Delete <br>
+ 3. Use datalist for the "enter a symbol" box to prompt symbols start with the keywords typed (Server call required, possible performance hog)<br><br>
+
+B. Performance <br>
+ 1. Server side cache ($_SESSION) user's watchlist, to avoid constantly querying DB<br>
+ 2. Server side cache ($_SERVER) database connection once established, to speed up page load<br><br>
+
+
+
+</body>
+</html>
