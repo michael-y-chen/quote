@@ -4,7 +4,7 @@ require 'dbconn.php';
 
 $user='1';
 $where = "";
-if ($_POST['symbol']){
+if ( isset($_POST['symbol'])){
  switch ($_POST['action']){
   case "add":
     $where = " where symbol = '".$_POST['symbol']."'";
