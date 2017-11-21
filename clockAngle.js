@@ -1,12 +1,7 @@
 
-console.log (calculateSmallestAngle("18:53:45"))
-console.log (calculateSmallestAngle("23:00:01"))
-console.log (calculateSmallestAngle("12:00:00"))
-console.log (calculateSmallestAngle("12:00:01"))
-
 
 function calculateSmallestAngle(timeOfDay) {
-    
+
     /* getting hr-mi-sec */
     time=timeOfDay.split(":")
     
@@ -32,17 +27,15 @@ function calculateSmallestAngle(timeOfDay) {
     
     /* hands angle from 12 */
     hourAngle = 360*hour/12
-    minAngle = 60*min/12
-    secAngle = 60*sec/12
-    
+    minAngle = 360*min/60
+    secAngle = 360*sec/60
+     
     var anglesArray=[]
     
     anglesArray = twoAngles(anglesArray, hourAngle, minAngle)
     anglesArray = twoAngles(anglesArray, hourAngle, secAngle)
     anglesArray = twoAngles(anglesArray, secAngle, minAngle)
 
-    console.log(anglesArray)
-    
     minAngle = Math.min.apply(0,anglesArray)
     
     return minAngle.toFixed(2)
