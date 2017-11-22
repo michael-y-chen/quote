@@ -1,7 +1,7 @@
 Launch test.js from node to test clockAngle.js and sumArray.js
-
-clockAngle.js and sumArray.js contains functions to:
-clockAngle - calculateSmallistAngle
-sumArray - Recursively sum all the number elements in an array
+<br><br>
+clockAngle.js and sumArray.js contains functions to:<br>
+clockAngle - calculateSmallistAngle<br>
+sumArray - Recursively sum all the number elements in an array<br>
 
 
